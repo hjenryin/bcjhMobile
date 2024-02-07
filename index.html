@@ -5,8 +5,8 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
   <title>个人爱好[白菜菊花]</title>
   <link rel="icon" href="./favicon.png?v=1">
-  <link rel="stylesheet" href="./css/index.css?v=41">
-  <link rel="stylesheet" href="./css/image.css?v=51">
+  <link rel="stylesheet" href="./css/index.css?v=44">
+  <link rel="stylesheet" href="./css/image.css?v=58">
   <link rel="stylesheet" href="./ele/index.css">
 </head>
 <body>
@@ -63,7 +63,7 @@
                     :option="chefs_list"
                     placeholder="选择厨师"
                     v-model="repChef"
-                    @focus="scroll(126)"
+                    @focus="scroll(162)"
                   ></muti-select>
                 </span>
                 <span class="select-box split-right chef-task" style="width: 130px; position: relative; z-index: 1002; margin-bottom: 0;" v-if="repChef.id.length == 1">
@@ -93,7 +93,7 @@
                     v-model="partial_skill"
                     ref="partialSkill"
                     :max="2"
-                    @focus="scroll(156)"
+                    @focus="scroll(192)"
                   ></muti-select>
                 </span>
                 <span
@@ -109,7 +109,7 @@
                     ref="repChefEquip"
                     :max="1"
                     @change="initRep"
-                    @focus="scroll(156)"
+                    @focus="scroll(192)"
                   ></muti-select>
                 </span>
               </div>
@@ -187,7 +187,7 @@
                     :option="materials_list"
                     placeholder="耗材效率"
                     v-model="repFilter.materialEff"
-                    @focus="scroll(416 + (repChef.id.length > 0 ? 30 : 0))"
+                    @focus="scroll(452 + (repChef.id.length > 0 ? 30 : 0))"
                   ></muti-select>
                 </span>
               </div>
@@ -209,7 +209,7 @@
                 <div class="prepend-input">
                   <div class="input-box">
                     <div class="prepend">单价大于</div>
-                    <input type="number" v-model="repFilter.price" @focus="scroll(357 + (repChef.id.length > 0 ? 30 : 0))" />
+                    <input type="number" v-model="repFilter.price" @focus="scroll(393 + (repChef.id.length > 0 ? 30 : 0))" />
                   </div>
                 </div>
                 <el-switch
@@ -234,7 +234,25 @@
                     placeholder="合成菜谱"
                     v-model="repFilter.comboRep"
                     :max="1"
-                    @focus="scroll(487 + (repChef.id.length > 0 ? 30 : 0))"
+                    @focus="scroll(523 + (repChef.id.length > 0 ? 30 : 0))"
+                    ></muti-select>
+                </span>
+              </div>
+              <div class="checkbox-contain">
+                <span
+                  class="checkbox"
+                  :class="repFilter.invitation ? 'active' : ''"
+                  style="vertical-align: top;"
+                  @click="repFilter.invitation = !repFilter.invitation"
+                >宴会贵客</span>
+                <span class="select-box" v-show="repFilter.invitation" style="position: relative; z-index: 999;">
+                  <muti-select
+                    ref="invitationGuestRef"
+                    :option="invitation_guest_list"
+                    placeholder="宴会贵客"
+                    v-model="repFilter.invitationGuest"
+                    :max="1"
+                    @focus="scroll(559 + (repChef.id.length > 0 ? 30 : 0))"
                     ></muti-select>
                 </span>
               </div>
@@ -425,6 +443,58 @@
               </div>
             </div>
           </div>
+          <div v-show="navId === 12">
+            <div class="box">
+              <div class="box-title">展示列</div>
+              <div class="hr"></div>
+              <span class="checkbox" @click="selectAll('amberCol')">全选</span>
+              <span
+                v-for="(val, key) in amberColName"
+                class="checkbox"
+                :class="amberCol[key] ? 'active' : ''"
+                @click="amberCol[key] = !amberCol[key]"
+              >{{val}}</span>
+            </div>
+            <div class="box">
+              <div class="box-title">筛选</div>
+              <div class="hr"></div>
+              <div class="checkbox-contain">
+                <span
+                  class="checkbox"
+                  v-for="(val, key) in amberFilter.rarity"
+                  :class="val ? 'active' : ''"
+                  @click="amberFilter.rarity[key] = !val"
+                >{{key}}星</span>
+              </div>
+              <div class="checkbox-contain">
+                <span
+                  class="checkbox"
+                  v-for="(val, key) in amberFilter.origin"
+                  :class="val.flag ? 'active' : ''"
+                  @click="amberFilter.origin[key].flag = !val.flag"
+                >{{val.name}}</span>
+              </div>
+              <div class="checkbox-contain" style="padding-top: 2px;">
+                <div style="padding-bottom: 6px;" v-for="(group, idx) in amberFilter.skillType">
+                  <span
+                    style="margin: 2px;"
+                    class="checkbox"
+                    v-for="(val, key) in group"
+                    :class="val.flag ? 'active' : ''"
+                    @click="clickAmberSkillType(idx, key)"
+                  >{{val.name}}</span>
+                </div>
+                <span class="checkbox" @click="selectAll('amberFilter.skillType')">全选</span>
+                <el-switch
+                  v-model="amber_radio"
+                  active-color="#82a1b0"
+                  active-text="单选"
+                  @change="changeAmberRadio"
+                  inactive-color="#ddd">
+                </el-switch>
+              </div>
+            </div>
+          </div>
           <div v-show="navId === 10">
             <div class="box">
               <div class="box-title">展示列</div>
@@ -595,7 +665,7 @@
           </footer>
         </div>
       </el-drawer>
-      <div v-if="([1, 2, 3, 4, 5, 10].indexOf(navId) > -1 || (navId == 7 && calCode == 'rep')) && !hideSuspend" v-show="isOriginHei" class="suspend icon-btn" @click="rightBar = true">
+      <div v-if="([1, 2, 3, 4, 5, 10, 12].indexOf(navId) > -1 || (navId == 7 && calCode == 'rep')) && !hideSuspend" v-show="isOriginHei" class="suspend icon-btn" @click="rightBar = true">
         <i class="el-icon-search"></i>
       </div>
       <el-dialog
@@ -628,6 +698,17 @@
         <div class="input-box" v-show="navId==3">
           <span class="label">厨具分页</span>
           <el-select size="mini" v-model="equipsPageSize" @change="handlePageSizeChange($event, 'equips')">
+            <el-option
+              v-for="item in page_list"
+              :key="item.id"
+              :label="item.name"
+              :value="item.id">
+            </el-option>
+          </el-select>
+        </div>
+        <div class="input-box" v-show="navId==12">
+          <span class="label">遗玉分页</span>
+          <el-select size="mini" v-model="ambersPageSize" @change="handlePageSizeChange($event, 'ambers')">
             <el-option
               v-for="item in page_list"
               :key="item.id"
@@ -680,7 +761,7 @@
             </el-option>
           </el-select>
         </div>
-        <div class="warning-tip" v-if="([1, 2, 3, 4, 6, 10].indexOf(navId) > -1 || (navId == 7 && calCode == 'rep'))">除【任务】页不建议选所有，会卡</div>
+        <div class="warning-tip" v-if="([1, 2, 3, 4, 6, 10, 12].indexOf(navId) > -1 || (navId == 7 && calCode == 'rep'))">除【遗玉】页不建议选所有，会卡</div>
         <div class="input-box" style="margin-bottom: 10px;">
           <span class="label">默认首页</span>
           <el-select size="mini" style="width: 101px;" v-model="userNav">
@@ -723,6 +804,24 @@
           <span>
             <el-switch
               style="display: block"
+              v-model="defaultDiskMax"
+              active-color="#82a1b0"
+              active-text="计算器心法盘默认满级"
+              inactive-color="#ddd">
+            </el-switch>
+          </span>
+          <span>
+            <el-switch
+              style="display: block"
+              v-model="hiddenDisk"
+              active-color="#82a1b0"
+              active-text="计算器隐藏心法盘"
+              inactive-color="#ddd">
+            </el-switch>
+          </span>
+          <span>
+            <el-switch
+              style="display: block"
               v-model="calShowGot"
               active-color="#82a1b0"
               active-text="计算器只展示已有厨师菜谱"
@@ -757,7 +856,7 @@
       <div class="notice" v-if="navId == 4 && decoBuff && decoSelectId.length > 0">{{decoBuff}}</div>
       <div class="notice" v-if="(navId == 1 || navId == 2) && partial_skill.id.length > 0 && chefUltimate">{{tips}}</div>
       <span class="right">
-        <i v-if="hideSuspend && ([1, 2, 3, 4, 5, 10].indexOf(navId) > -1 || (navId == 7 && calCode == 'rep'))" class="icon-btn el-icon-search" style="margin-left: 6px;" @click="rightBar = true"></i>
+        <i v-if="hideSuspend && ([1, 2, 3, 4, 5, 10, 12].indexOf(navId) > -1 || (navId == 7 && calCode == 'rep'))" class="icon-btn el-icon-search" style="margin-left: 6px;" @click="rightBar = true"></i>
         <i class="icon-btn el-icon-s-tools" @click="settingVisible = true"></i>
       </span>
     </section>
@@ -775,9 +874,9 @@
           <div class="title">最近更新</div>
           <div class="hr"></div>
           <div class="box-body">
-            <div class="p">2023-06-12 10:40 更新礼包厨师簪娘。</div>
-            <div class="p">2023-06-01 17:50 新增限时邮件菜谱虎喵护苗餐；修复个人页导入L图鉴数据，莉莉公主已修炼的情况，全体厨师全技法会多30的bug。</div>
-            <div class="p">2023-05-12 15:00 修复藻白的修炼技能会添加给自己的bug。</div>
+            <div class="p">2024-02-02 01:35 新增瑞龙庆春池相关厨师菜谱数据；修复计算器中，特定操作后上菜谱，默认份数不对的bug。</div>
+            <div class="p">2024-01-17 16:20 新增同步游戏数据的功能（待官方上线中）。</div>
+            <div class="p">2024-01-05 19:45 新增礼包厨师静静谛听，支持隐藏心法盘。</div>
           </div>
           <div class="title">常见问题</div>
           <div class="hr"></div>
@@ -798,11 +897,7 @@
             </div>
             <div class="p">
               <p>Q: 我要怎么把我有的菜谱、厨师导入到图鉴里呢？<br/></p>
-              <p>A: 如果之前有维护过L图鉴的数据，可以直接使用【个人】页的<span class="code">L版图鉴数据转移</span>功能，否则需要录入。
-                <div style="padding-left: 20px;">
-                  <p>自动生成：安卓用户可以下载个人数据生成器：<a href="https://wws.lanzouy.com/b01jjc70j">点击下载，密码：bcjh</a>，选用最新版本下载使用，下载链接里有使用说明记得看。</p>
-                  <p>手动录入：【菜谱】【厨师】页里，点右下角的 <i class="el-icon-search"></i>，将<span class="code">展示列</span>里的<span class="code">已有</span>点亮，然后就可以在表格里勾选你有的厨师菜谱，还可以根据来源搜索后点击<span class="code">全选</span>。</p>
-                </div>
+              <p>A: 游戏内点击左上角昵称，然后点击<span class="code">设置</span>-<span class="code">白菜菊花</span>获取校验码，然后将校验码填入本图鉴的【个人】页，使用<span class="code">官方数据导入</span>功能导入即可
             </div>
             <div class="p">
               <p>Q: 为什么我计算器算出来的分数和游戏里不一样？<br/></p>
@@ -892,6 +987,7 @@
           <el-table-column sortable="custom" prop="combo" min-width="80" label="可合成" v-if="repCol.combo"></el-table-column>
           <el-table-column sortable="custom" prop="normal_guests" min-width="125" label="贵客" v-if="repCol.guests"></el-table-column>
           <el-table-column sortable="custom" prop="degree_guests" label="升阶贵客" min-width="110" v-if="repCol.degree_guests"></el-table-column>
+          <el-table-column sortable="custom" prop="invitation_guests" label="宴会贵客" min-width="110" v-if="repCol.invitation_guests"></el-table-column>
           <el-table-column sortable="custom" prop="gift" label="神级符文" min-width="92" v-if="repCol.gift"></el-table-column>
           <el-table-column sortable="custom" prop="got" label="已有" min-width="68" v-if="repCol.got">
             <template slot-scope="scope">
@@ -1021,6 +1117,46 @@
             :pager-count="5"
             layout="total, prev, pager, next"
             :total="equips.length">
+          </el-pagination>
+        </div>
+      </div>
+      <div v-show="navId === 12">
+        <div class="search-box">
+          <el-input size="small" prefix-icon="el-icon-search" placeholder="名字 技能 来源" v-model="amberFilter.amberKeyword">
+          </el-input>
+        </div>
+        <el-table
+          :data="ambersPage"
+          style="width: 100%"
+          ref='ambersTable'
+          @sort-change="handleAmberSort"
+          v-if="tableShow"
+          :height="tableHeight">
+          <el-table-column fixed sortable="custom" prop="galleryId" label="No." width="55" v-if="amberCol.id"></el-table-column>
+          <el-table-column fixed label="" width="45" v-if="amberCol.img">
+            <template slot-scope="scope">
+              <div class="icon-amber" :class="'amber_' + scope.row.amberId"></div>
+            </template>
+          </el-table-column>
+          <el-table-column fixed sortable="custom" prop="name" label="名字" width="80"></el-table-column>
+          <el-table-column sortable="custom" prop="rarity_show" label="星" min-width="55" v-if="amberCol.rarity"></el-table-column>
+          <el-table-column sortable="custom" prop="color" label="颜色" min-width="55" v-if="amberCol.color"></el-table-column>
+          <el-table-column sortable="custom" prop="skill" label="技能" min-width="155" v-if="amberCol.skill"></el-table-column>
+          <el-table-column sortable="custom" prop="amplification" label="成长" min-width="55" v-if="amberCol.amplification"></el-table-column>
+          <el-table-column sortable="custom" prop="skill_detail" label="详细技能" min-width="155" v-if="amberCol.skillDetail"></el-table-column>
+          <el-table-column sortable="custom" prop="origin" label="来源" min-width="100" v-if="amberCol.origin"></el-table-column>
+          <el-table-column label="" min-width="1"></el-table-column>
+        </el-table>
+        <div class="pagination">
+          <el-pagination
+            background
+            small
+            :page-size="ambersPageSize"
+            :current-page.sync="ambersCurPage"
+            @current-change="handleCurrentChange"
+            :pager-count="5"
+            layout="total, prev, pager, next"
+            :total="ambers.length">
           </el-pagination>
         </div>
       </div>
@@ -1275,6 +1411,17 @@
                           <div class="img icon-chef" :class="'chef_' + calChefShow[chef].id">
                             <span v-show="calChefShow[chef].ultimate" class="ultimate">满</span>
                           </div>
+                          <div class="show-disk" v-show="!hiddenDisk">
+                            <div class="disk-level"><div>{{calDiskLevel[chef].current}}</div></div>
+                            <div
+                              class="disk-amber"
+                              :class="(calAmber[chef][idx] && calAmber[chef][idx].id[0] ? 'active ' : '') + 'amber-' + type"
+                              v-for="(type, idx) in calChef[chef].row[0].disk.info">
+                              <div>
+                                <i class="el-icon-plus"></i>
+                              </div>
+                            </div>
+                          </div>
                         </div>
                         <div class="skill-box">
                           <div
@@ -1318,13 +1465,13 @@
                     >
                       <div v-if="calRep[`${chef}-${rep}`].row[0]" class="show">
                         <div class="img icon-recipe" :class="'recipe_' + calRep[`${chef}-${rep}`].row[0].id">
-                          <span class="cnt">{{calType.row[0].MaterialsLimit ? showRepCnt(calRepCnt[`${chef}-${rep}`], calRepLimit[`${chef}-${rep}`]) : calRepCnt[`${chef}-${rep}`]}}</span>
+                          <span class="cnt">{{showRepCnt(calRepCnt[`${chef}-${rep}`], calRepLimit[`${chef}-${rep}`])}}</span>
                           <span class="expert" v-if="calRepEx[`${chef}-${rep}`]">
                             <i class="el-icon-success"></i>
                           </span>
-                          <span class="is-combo" v-if="calRep[`${chef}-${rep}`].row[0].isCombo">
+                          <!-- <span class="is-combo" v-if="calRep[`${chef}-${rep}`].row[0].isCombo">
                             合
-                          </span>
+                          </span> -->
                         </div>
                         <div class="rep-detail" v-if='showDetail'>
                           ${{calRepShow[chef-1][rep-1].price}}
@@ -1339,7 +1486,7 @@
               </div>
               <div ref="tool" class="tool" v-show="calFocus">
                 <div v-for="(val, key) in calChef" v-show="calFocus == `Chef_${key}`">
-                  <span class="select-box" style="width: calc(50% - 7.5px);">
+                  <span class="select-box chef-select">
                     <muti-select
                       :ref="`calChef_${key}`"
                       placeholder="请选择厨师"
@@ -1347,11 +1494,12 @@
                       v-model="calChef[key]"
                       :max="1"
                       :disable="disable"
+                      @change="setDiskList(key)"
                       @focus="calScroll"
                       @click="getRecommend('chef', key)"
                     ></muti-select>
                   </span>
-                  <span class="select-box" style="width: calc(50% - 7.5px); padding-left: 0;">
+                  <span class="select-box chef-select" style="padding-left: 0; ">
                     <muti-select
                       :ref="`calCondiment_${key}`"
                       placeholder="请选择调料"
@@ -1363,6 +1511,30 @@
                       @click="getRecommend('condi', key)"
                     ></muti-select>
                   </span>
+                  <div v-show="calChef[key]" class="disk">
+                    <div class="prepend-input">
+                      <div class="input-box">
+                        <div class="prepend">心法</div>
+                        <input type="number" @change="handleDiskLevelChange(key)" v-model.lazy="calDiskLevel[key].current"/>
+                      </div>
+                    </div>
+                    <div class="amber-list-box">
+                      <span class="select-box" v-for="(amber, idx) in calAmberList[key]">
+                        <muti-select
+                          :class="'amber-list-' + amber[0].type"
+                          :ref="`calAmber_${key}_${idx}`"
+                          placeholder="选择遗玉"
+                          :option="amber"
+                          v-model="calAmber[key][idx]"
+                          @change="handleCalAmberChange(key, idx)"
+                          :max="1"
+                          :disable="disable"
+                          @focus="calScroll"
+                          @click="getRecommend('amber', key, idx)"
+                        ></muti-select>
+                      </span>
+                    </div>
+                  </div>
                 </div>
                 <div v-for="(val, key) in calEquip" v-show="calFocus == `Equip_${key}`">
                   <span class="select-box" style="width: calc(100% - 10px);">
@@ -1409,11 +1581,11 @@
                         type="number"
                         class="input"
                         v-model.lazy="calRepCnt[key]"
-                        :max="calType.row[0].MaterialsLimit ? calRepLimit[key] : calRep[key].row[0].limit"
+                        :max="calRepLimit[key]"
                         :min="0"
-                        @change="handleRepCntChange(key, calType.row[0].MaterialsLimit ? calRepLimit[key] : calRep[key].row[0].limit)"
+                        @change="handleRepCntChange(key, calRepLimit[key])"
                       />
-                      <span class="max">/ {{calType.row[0].MaterialsLimit ? calRepLimit[key] : calRep[key].row[0].limit}}</span>
+                      <span class="max">/ {{calRepLimit[key]}}</span>
                     </div>
                   </div>
                   <div class="tool-condiment" v-if="calRep[key].row[0] && calChef[key.split('-')[0]].row[0] && calCondiment[key.split('-')[0]].row[0]">
@@ -1696,8 +1868,57 @@
           </div>
         </div>
       </div>
+      <div v-show="navId === 11">
+        <div class="info-box" :style="'height: '+ boxHeight + 'px;'">
+          <div class="title">宴会跑分计算器</div>
+          <div class="hr"></div>
+          <div class="box-body">
+            <div class="p" style="font-size: 18px; margin: 20px 0 20px 10px;">
+              点击链接或复制到浏览器打开使用：<a href="https://run.bcjh.xyz">https://run.bcjh.xyz</a>
+            </div>
+            <div class="p">可以根据个人数据自动生成江湖风云宴的较优作业（不是最优解，只是提供思路），菜谱默认无专精。</div>
+            <div class="p">生成的作业可以在L图鉴<a href="https://foodgame.github.io">https://foodgame.github.io</a>计算器手动微调。</div>
+            <div class="p">规则列表和L图鉴的保持一致，<strong>仅提供州、省分段的</strong>。每周L图鉴更新宴会计算器规则后，会尽快同步规则。</div>
+          </div>
+          <div class="title">使用说明</div>
+          <div class="hr"></div>
+          <div class="box-body">
+            <div class="p">
+              首次使用或个人数据有更新时，需要填入<span class="code">白菜菊花数据ID</span>。
+              在【个人】页使用<span class="code">个人数据云端暂存</span>功能获取。
+            </div>
+            <div class="p">
+              上传个人数据前，需要在本网页维护好厨师、菜谱已有数据和个人修炼数据。
+              修炼数据在【个人】页对照游戏内总修炼填写，厨师菜谱已有数据详细录入方式见首页常见问题。
+            </div>
+            <div class="p">
+              <span class="code">期望分数</span>是你希望能达到的分数，因为跑分逻辑是找到满足期望分数的就返回结果，所以这个分越低出结果就越快。
+              如果始终达不到期望分数，就会把迭代次数跑完，然后返回一个最高的结果。所以期望分数可以往高了填。
+            </div>
+            <div class="p">
+              <span class="code">迭代次数</span>指程序尝试的厨师菜谱组合次数，迭代次数越多跑出来的结果就越有可能更好。
+              对跑出来的结果不满意的话，可以尝试把迭代次数设大一点再跑。
+            </div>
+            <div class="p">
+              计算使用的是本地的CPU资源，长时间执行可能会导致设备发热，飞速掉电等情况。
+              所以不建议把迭代次数设得非常大！！<strong>大家对自己的设备好一点啊喂</strong>
+            </div>
+            <div class="p">
+              分数列表中红色的表示没达到期望分数，绿色的表示达到了，每一个分数都可以点击，用来查看对应的作业。
+            </div>
+          </div>
+        </div>
+      </div>
       <div v-if="navId === 8">
         <div class="ultimate-box" :style="'height: '+ boxHeight + 'px;'">
+          <div class="title">官方数据导入</div>
+          <div class="hr"></div>
+          <div class="box-body">
+            <div class="btn-box" style="margin-top: 10px;">
+              <el-input placeholder="在游戏设置页面获取校验码" v-model="userDataCode" size="mini" style="width: 180px;"></el-input>
+              <span class="btn" @click="syncUserData">导入数据</span>
+            </div>
+          </div>
           <div class="title">个人装饰/修炼数据配置</div>
           <div class="hr"></div>
           <div class="box-body">
@@ -1852,7 +2073,7 @@
           <div class="hr"></div>
           <div class="box-body">
             <div class="p">
-              本网页为<a href="https://foodgame.gitee.io">爆炒江湖图鉴网</a> by L 的精简手机版，开发者 小鱼，页面功能、数据等均参照原图鉴网（L神yyds！）。
+              本网页为<a href="https://foodgame.github.io">爆炒江湖图鉴网</a> by L 的精简手机版，开发者 小鱼，页面功能、数据等均参照原图鉴网（L神yyds！）。
             </div>
             <div class="p">
               本网页大部分功能与原图鉴网保持一致，不一致的部分会在下面的页面详情里详细说明。
@@ -1864,8 +2085,7 @@
               正式：<a href="https://www.bcjh.xyz">https://www.bcjh.xyz</a>，现在不用收钱了！
             </div>
             <div class="p">
-              备胎①：<a href="https://bcjh.pages.dev">https://bcjh.pages.dev</a>，移动网或部分地区的网会打不开，还可能跳到反诈中心<br/>
-              备胎②：<a href="https://yuwenxifan.github.io/bcjhMobile">https://yuwenxifan.github.io/bcjhMobile</a>，国内使用可能会比较慢
+              备胎：<a href="https://yuwenxifan.github.io/bcjhMobile">https://yuwenxifan.github.io/bcjhMobile</a>，国内使用可能会比较慢
             </div>
             <div class="p">
               APP下载地址：<a href="https://wws.lanzouy.com/i3vs205msk0b">点击下载，密码：bcjh</a>
@@ -1958,6 +2178,7 @@
   <script src="./ele/index.js"></script>
   <script src="./js/jquery-2.1.4.min.js"></script>
   <script src="./js/echarts.min.js"></script>
-  <script src="./js/index.js?v=214"></script>
+  <script src="./js/common.js?v=1"></script>
+  <script src="./js/index.js?v=232"></script>
 </body>
 </html>
